@@ -1,0 +1,17 @@
+name: Check correct version in README
+on:
+  push:
+    paths:
+      - README.md
+
+jobs:
+  check_v_in_example:
+    runs-on: ubuntu-latest
+    name: Test version in example
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Check version
+        uses: JJ/github-action-check-version-in-readme-is-latest@v3
