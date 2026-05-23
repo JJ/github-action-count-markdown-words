@@ -1,6 +1,9 @@
 name: Count Markdown Words
 description: Count words in markdown files by document and section
-author: JJ
+author: 'JJ Merelo + CoPilot'
+branding:
+  icon: 'file-text'
+  color: 'blue'
 inputs:
   path:
     description: Root path to scan for markdown files
