@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/JJ/github-action-count-markdown-words#readme",
   "dependencies": {
-    "@actions/core": "^1.11.1",
+    "@actions/core": "^3",
     "remark-parse": "^11.0.0",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0"
