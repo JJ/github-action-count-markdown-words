@@ -1,6 +1,14 @@
-const core = require("@actions/core");
 const path = require("node:path");
 const { countRepositoryWords } = require("./wordCount");
+let corePromise;
+
+async function getCore() {
+  if (!corePromise) {
+    corePromise = import("@actions/core");
+  }
+
+  return corePromise;
+}
 
 function parseDepth(depthInput) {
   if (!depthInput || !depthInput.trim()) {
@@ -34,6 +42,7 @@ function formatTable(headers, rows) {
 }
 
 async function publishSummary(results) {
+  const core = await getCore();
   const documentRows = results.documents.map((document) => [document.path, String(document.totalWords)]);
   const documentTable = formatTable(["Document", "Total words"], documentRows);
 
@@ -66,7 +75,9 @@ async function publishSummary(results) {
 }
 
 async function run() {
+  let core;
   try {
+    core = await getCore();
     const targetPath = core.getInput("path") || ".";
     const absolutePath = path.resolve(targetPath);
     const depth = parseDepth(core.getInput("depth"));
@@ -78,7 +89,12 @@ async function run() {
     core.setOutput("repository_total_words", String(results.repositoryTotalWords));
     core.setOutput("results_json", JSON.stringify(results));
   } catch (error) {
-    core.setFailed(error.message);
+    if (core) {
+      core.setFailed(error.message);
+      return;
+    }
+
+    throw error;
   }
 }
 
