@@ -19,5 +19,5 @@ outputs:
   results_json:
     description: JSON representation of document and section word counts
 runs:
-  using: node20
+  using: node24
   main: src/index.js
