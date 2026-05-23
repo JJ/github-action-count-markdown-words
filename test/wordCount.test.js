@@ -5,6 +5,8 @@ const os = require("node:os");
 const path = require("node:path");
 const { countWordsInMarkdown, countRepositoryWords } = require("../src/wordCount");
 
+const FIXTURES_DIR = path.join(__dirname, "fixtures");
+
 test("counts only text words and excludes image captions", () => {
   const markdown = `
 Text one.
@@ -90,4 +92,96 @@ test("counts words in .Rmd and .qmd files", async () => {
     ["analysis.Rmd", "report.qmd"],
   );
   assert.equal(result.repositoryTotalWords, 5);
+});
+
+test("counts section words at every heading level in a .md fixture", async () => {
+  const content = await fs.readFile(path.join(FIXTURES_DIR, "multi-level.md"), "utf8");
+  const result = countWordsInMarkdown(content);
+
+  assert.equal(result.totalWords, 18);
+  assert.deepEqual(
+    result.sections.map((s) => ({ level: s.level, title: s.title, words: s.words })),
+    [
+      { level: 1, title: "Introduction", words: 4 },
+      { level: 2, title: "Background", words: 4 },
+      { level: 3, title: "Details", words: 3 },
+      { level: 2, title: "Summary", words: 3 },
+    ],
+  );
+});
+
+test("counts section words at every heading level in a .qmd fixture", async () => {
+  const content = await fs.readFile(path.join(FIXTURES_DIR, "report.qmd"), "utf8");
+  const result = countWordsInMarkdown(content);
+
+  assert.equal(result.totalWords, 21);
+  assert.deepEqual(
+    result.sections.map((s) => ({ level: s.level, title: s.title, words: s.words })),
+    [
+      { level: 1, title: "Report Title", words: 5 },
+      { level: 2, title: "Findings", words: 4 },
+      { level: 3, title: "Analysis", words: 4 },
+      { level: 2, title: "Conclusions", words: 3 },
+    ],
+  );
+});
+
+test("counts section words at every heading level in a .Rmd fixture", async () => {
+  const content = await fs.readFile(path.join(FIXTURES_DIR, "analysis.Rmd"), "utf8");
+  const result = countWordsInMarkdown(content);
+
+  assert.equal(result.totalWords, 22);
+  assert.deepEqual(
+    result.sections.map((s) => ({ level: s.level, title: s.title, words: s.words })),
+    [
+      { level: 1, title: "Analysis Document", words: 3 },
+      { level: 2, title: "Methods", words: 4 },
+      { level: 3, title: "Data Sources", words: 5 },
+      { level: 2, title: "Results", words: 4 },
+    ],
+  );
+});
+
+test("counts section words at every heading level in a .markdown fixture", async () => {
+  const content = await fs.readFile(path.join(FIXTURES_DIR, "notes.markdown"), "utf8");
+  const result = countWordsInMarkdown(content);
+
+  assert.equal(result.totalWords, 22);
+  assert.deepEqual(
+    result.sections.map((s) => ({ level: s.level, title: s.title, words: s.words })),
+    [
+      { level: 1, title: "Notes", words: 4 },
+      { level: 2, title: "Section One", words: 4 },
+      { level: 2, title: "Section Two", words: 4 },
+      { level: 3, title: "Sub-section", words: 4 },
+    ],
+  );
+});
+
+test("scans fixture directory and reports all supported extensions with sections", async () => {
+  const result = await countRepositoryWords(FIXTURES_DIR);
+
+  assert.deepEqual(
+    result.documents.map((d) => d.path),
+    ["analysis.Rmd", "multi-level.md", "notes.markdown", "report.qmd"],
+  );
+  assert.equal(result.repositoryTotalWords, 83);
+
+  for (const document of result.documents) {
+    assert.ok(document.sections.length > 0, `${document.path} should have sections`);
+  }
+});
+
+test("respects depth limit when counting sections across fixture files", async () => {
+  const content = await fs.readFile(path.join(FIXTURES_DIR, "multi-level.md"), "utf8");
+  const result = countWordsInMarkdown(content, 2);
+
+  assert.deepEqual(
+    result.sections.map((s) => ({ level: s.level, title: s.title })),
+    [
+      { level: 1, title: "Introduction" },
+      { level: 2, title: "Background" },
+      { level: 2, title: "Summary" },
+    ],
+  );
 });
