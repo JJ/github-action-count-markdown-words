@@ -1,0 +1,11 @@
+# Analysis Document
+Statistical analysis results.
+
+## Methods
+Describing the methods used.
+
+### Data Sources
+Primary and secondary data sources.
+
+## Results
+Presenting the results here.

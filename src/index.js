@@ -64,11 +64,35 @@ async function publishSummary(results) {
   }
 
   try {
-    await core.summary
+    const summary = core.summary
       .addHeading("Markdown word count")
-      .addRaw(`${documentTable}\n\n`, true)
-      .addRaw(`**Repository total words:** ${results.repositoryTotalWords}\n\n`, true)
-      .write();
+      .addTable([
+        [
+          { data: "Document", header: true },
+          { data: "Total words", header: true },
+        ],
+        ...documentRows,
+      ])
+      .addRaw(`\n**Repository total words:** ${results.repositoryTotalWords}\n\n`, true);
+
+    for (const document of results.documents) {
+      if (!document.sections.length) {
+        continue;
+      }
+
+      summary
+        .addHeading(`Sections for ${document.path}`, 3)
+        .addTable([
+          [
+            { data: "Level", header: true },
+            { data: "Section", header: true },
+            { data: "Words", header: true },
+          ],
+          ...document.sections.map((section) => [String(section.level), section.title, String(section.words)]),
+        ]);
+    }
+
+    await summary.write();
   } catch (error) {
     core.info(`Workflow summary unavailable: ${error.message}`);
   }
