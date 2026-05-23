@@ -5,6 +5,8 @@ GitHub Action to count words in markdown files for:
 - each section (by heading level, configurable)
 - repository-wide total
 
+Scanned file extensions: `.md`, `.markdown`, `.Rmd`, `.qmd`.
+
 ## Features
 
 - Counts text words from markdown content

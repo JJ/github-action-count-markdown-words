@@ -2,36 +2,40 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { unified } = require("unified");
 const remarkParse = require("remark-parse").default;
-const { visit } = require("unist-util-visit");
 
 const WORD_REGEX = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
+const SKIPPED_NODE_TYPES = new Set(["image", "imageReference", "code", "inlineCode", "html"]);
 
 function countWordsFromText(text) {
   const matches = text.match(WORD_REGEX);
   return matches ? matches.length : 0;
 }
 
+function collectText(node, parts) {
+  if (!node || SKIPPED_NODE_TYPES.has(node.type)) {
+    return;
+  }
+
+  if (node.type === "text" && node.value) {
+    parts.push(node.value);
+  }
+
+  if (node.type === "break" || node.type === "thematicBreak") {
+    parts.push(" ");
+  }
+
+  if (Array.isArray(node.children)) {
+    for (const child of node.children) {
+      collectText(child, parts);
+    }
+  }
+}
+
 function textFromNodes(nodes) {
   const parts = [];
 
   for (const node of nodes) {
-    visit(node, (current) => {
-      if (current.type === "image" || current.type === "imageReference") {
-        return "skip";
-      }
-      if (current.type === "code" || current.type === "inlineCode") {
-        return "skip";
-      }
-      if (current.type === "html") {
-        return "skip";
-      }
-      if (current.type === "text" && current.value) {
-        parts.push(current.value);
-      }
-      if (current.type === "break" || current.type === "thematicBreak") {
-        parts.push(" ");
-      }
-    });
+    collectText(node, parts);
     parts.push(" ");
   }
 
@@ -126,7 +130,12 @@ async function findMarkdownFiles(rootPath, excludeFilePaths = []) {
       }
       if (entry.isFile()) {
         const lowerName = entry.name.toLowerCase();
-        if (lowerName.endsWith(".md") || lowerName.endsWith(".markdown")) {
+        if (
+          lowerName.endsWith(".md") ||
+          lowerName.endsWith(".markdown") ||
+          lowerName.endsWith(".rmd") ||
+          lowerName.endsWith(".qmd")
+        ) {
           const relativePath = path.relative(root, fullPath);
           if (!excludedPaths.has(normalizeRelativePath(relativePath))) {
             files.push(fullPath);

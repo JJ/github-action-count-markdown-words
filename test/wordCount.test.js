@@ -16,6 +16,27 @@ Text two.
   assert.equal(result.totalWords, 4);
 });
 
+test("counts zero words for markdown containing only skipped node types", () => {
+  const markdown = [
+    "![caption should not count](image.png)",
+    "",
+    "`inline code words should not count`",
+    "",
+    "```js",
+    'const value = "block code words should not count";',
+    "```",
+    "",
+    "<img src=\"image.png\"/>",
+    "",
+    "![ref caption should not count][img]",
+    "",
+    "[img]: image.png",
+  ].join("\n");
+
+  const result = countWordsInMarkdown(markdown);
+  assert.equal(result.totalWords, 0);
+});
+
 test("returns section totals up to the selected depth", () => {
   const markdown = `
 # Intro
@@ -56,4 +77,17 @@ test("excludes configured markdown files from repository totals", async () => {
   const result = await countRepositoryWords(tempDir, Number.POSITIVE_INFINITY, ["README.md"]);
   assert.deepEqual(result.documents.map((document) => document.path), ["notes.md"]);
   assert.equal(result.repositoryTotalWords, 2);
+});
+
+test("counts words in .Rmd and .qmd files", async () => {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "md-word-count-ext-"));
+  await fs.writeFile(path.join(tempDir, "analysis.Rmd"), "alpha beta", "utf8");
+  await fs.writeFile(path.join(tempDir, "report.qmd"), "one two three", "utf8");
+
+  const result = await countRepositoryWords(tempDir, Number.POSITIVE_INFINITY);
+  assert.deepEqual(
+    result.documents.map((document) => document.path),
+    ["analysis.Rmd", "report.qmd"],
+  );
+  assert.equal(result.repositoryTotalWords, 5);
 });
