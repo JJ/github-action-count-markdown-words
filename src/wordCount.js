@@ -81,9 +81,37 @@ function countWordsInMarkdown(markdownText, maxDepth) {
   };
 }
 
-async function findMarkdownFiles(rootPath) {
+async function findMarkdownFiles(rootPath, excludeFilePaths = []) {
   const files = [];
   const root = path.resolve(rootPath);
+  const excludedPaths = new Set(
+    excludeFilePaths
+      .map((excludePath) => {
+        const trimmedPath = String(excludePath || "").trim();
+        if (!trimmedPath) {
+          return "";
+        }
+
+        const resolvedPath = path.resolve(root, trimmedPath);
+        const relativeResolvedPath = path.relative(root, resolvedPath);
+        if (
+          relativeResolvedPath &&
+          !relativeResolvedPath.startsWith("..") &&
+          !path.isAbsolute(relativeResolvedPath)
+        ) {
+          return relativeResolvedPath;
+        }
+
+        return trimmedPath;
+      })
+      .map((excludePath) => excludePath.replace(/^\.([/\\]|$)/, ""))
+      .map((excludePath) => path.normalize(excludePath).split(path.sep).join("/"))
+      .filter(Boolean),
+  );
+
+  function normalizeRelativePath(value) {
+    return value.split(path.sep).join("/");
+  }
 
   async function walk(currentPath) {
     const entries = await fs.readdir(currentPath, { withFileTypes: true });
@@ -99,7 +127,10 @@ async function findMarkdownFiles(rootPath) {
       if (entry.isFile()) {
         const lowerName = entry.name.toLowerCase();
         if (lowerName.endsWith(".md") || lowerName.endsWith(".markdown")) {
-          files.push(fullPath);
+          const relativePath = path.relative(root, fullPath);
+          if (!excludedPaths.has(normalizeRelativePath(relativePath))) {
+            files.push(fullPath);
+          }
         }
       }
     }
@@ -110,8 +141,8 @@ async function findMarkdownFiles(rootPath) {
   return files;
 }
 
-async function countRepositoryWords(rootPath, maxDepth) {
-  const files = await findMarkdownFiles(rootPath);
+async function countRepositoryWords(rootPath, maxDepth, excludeFilePaths = []) {
+  const files = await findMarkdownFiles(rootPath, excludeFilePaths);
   const documents = [];
   let repositoryTotalWords = 0;
 

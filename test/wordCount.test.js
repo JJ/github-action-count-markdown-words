@@ -47,3 +47,13 @@ test("counts totals across markdown files in a repository", async () => {
   assert.equal(result.documents.length, 2);
   assert.equal(result.repositoryTotalWords, 6);
 });
+
+test("excludes configured markdown files from repository totals", async () => {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "md-word-count-exclude-"));
+  await fs.writeFile(path.join(tempDir, "README.md"), "alpha beta gamma", "utf8");
+  await fs.writeFile(path.join(tempDir, "notes.md"), "one two", "utf8");
+
+  const result = await countRepositoryWords(tempDir, Number.POSITIVE_INFINITY, ["README.md"]);
+  assert.deepEqual(result.documents.map((document) => document.path), ["notes.md"]);
+  assert.equal(result.repositoryTotalWords, 2);
+});

@@ -19,6 +19,7 @@ GitHub Action to count words in markdown files for:
 | --- | --- | --- | --- |
 | `path` | No | `.` | Root directory to scan for markdown files |
 | `depth` | No | _(all levels)_ | Maximum heading depth to include in section tables |
+| `exclude` | No | `README.md` | Comma/newline-separated markdown file paths to exclude (relative to `path`) |
 
 ## Outputs
 
@@ -42,6 +43,9 @@ jobs:
         with:
           path: .
           depth: 4
+          exclude: |
+            README.md
+            docs/generated.md
 ```
 
 ## Development

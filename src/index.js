@@ -15,6 +15,17 @@ function parseDepth(depthInput) {
   return parsedDepth;
 }
 
+function parseExcludeInput(excludeInput) {
+  if (!excludeInput || !excludeInput.trim()) {
+    return [];
+  }
+
+  return excludeInput
+    .split(/[\n,]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
 function formatTable(headers, rows) {
   const headerRow = `| ${headers.join(" | ")} |`;
   const separatorRow = `| ${headers.map(() => "---").join(" | ")} |`;
@@ -59,7 +70,8 @@ async function run() {
     const targetPath = core.getInput("path") || ".";
     const absolutePath = path.resolve(targetPath);
     const depth = parseDepth(core.getInput("depth"));
-    const results = await countRepositoryWords(absolutePath, depth);
+    const excludePaths = parseExcludeInput(core.getInput("exclude"));
+    const results = await countRepositoryWords(absolutePath, depth, excludePaths);
 
     await publishSummary(results);
 

@@ -9,6 +9,10 @@ inputs:
   depth:
     description: Maximum heading depth to include in section breakdown
     required: false
+  exclude:
+    description: Comma or newline separated markdown file paths to exclude (relative to path input)
+    required: false
+    default: README.md
 outputs:
   repository_total_words:
     description: Total number of words across markdown files in the scanned path
