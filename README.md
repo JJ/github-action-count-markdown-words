@@ -57,3 +57,9 @@ Run tests:
 ```bash
 npm test
 ```
+
+Build single-file action bundle with ncc:
+
+```bash
+npm run build
+```

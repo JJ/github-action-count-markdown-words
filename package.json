@@ -4,6 +4,7 @@
   "description": "Count words in markdown files in a project",
   "main": "src/index.js",
   "scripts": {
+    "build": "ncc build src/index.js -o dist",
     "test": "node --test"
   },
   "repository": {
@@ -23,5 +24,8 @@
     "remark-parse": "^11.0.0",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.4"
   }
 }
