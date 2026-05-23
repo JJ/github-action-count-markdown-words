@@ -1,0 +1,31 @@
+{
+  "name": "github-action-count-markdown-words",
+  "version": "1.0.0",
+  "description": "Count words in markdown files in a project",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "ncc build src/index.js -o dist",
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JJ/github-action-count-markdown-words.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "GPL-3.0",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/JJ/github-action-count-markdown-words/issues"
+  },
+  "homepage": "https://github.com/JJ/github-action-count-markdown-words#readme",
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.4"
+  }
+}

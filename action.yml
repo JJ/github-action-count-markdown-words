@@ -1,0 +1,23 @@
+name: Count Markdown Words
+description: Count words in markdown files by document and section
+author: JJ
+inputs:
+  path:
+    description: Root path to scan for markdown files
+    required: false
+    default: .
+  depth:
+    description: Maximum heading depth to include in section breakdown
+    required: false
+  exclude:
+    description: Comma or newline separated markdown file paths to exclude (relative to path input)
+    required: false
+    default: README.md
+outputs:
+  repository_total_words:
+    description: Total number of words across markdown files in the scanned path
+  results_json:
+    description: JSON representation of document and section word counts
+runs:
+  using: node20
+  main: src/index.js
